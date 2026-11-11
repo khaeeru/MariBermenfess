@@ -1,16 +1,51 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const { createClient } = require('@supabase/supabase-js');
+
 const app = express();
 
 // Middleware
 app.use(cors());
 app.use(express.json());
 
+// Inisialisasi Supabase Client jika kredensial tersedia di Environment Variables
+const supabaseUrl = process.env.SUPABASE_URL || '';
+const supabaseKey = process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+
+let supabase = null;
+if (supabaseUrl && supabaseKey) {
+    try {
+        supabase = createClient(supabaseUrl, supabaseKey);
+        console.log("Database Supabase aktif & terhubung!");
+    } catch (err) {
+        console.error("Gagal inisialisasi Supabase Client:", err.message);
+    }
+} else {
+    console.warn("Info: SUPABASE_URL atau SUPABASE_ANON_KEY belum diisi. Menjalankan fallback database in-memory.");
+}
+
 // Sajikan file frontend statis dari folder Public
 app.use(express.static(path.join(__dirname, '../Public')));
 
-// Database Sementara (In-Memory Array) dengan cuplikan lagu 30 detik ASLI (HTTP 200 OK)
+// Helper konversi format data dari database Supabase (mendukung snake_case & camelCase)
+function formatMenfessRow(row) {
+    if (!row) return null;
+    return {
+        id: Number(row.id),
+        to: row.to || '',
+        from: row.from || 'Anonim',
+        song: row.song || '',
+        previewUrl: row.preview_url || row.previewUrl || '',
+        artworkUrl: row.artwork_url || row.artworkUrl || '',
+        message: row.message || '',
+        createdAt: row.created_at || row.createdAt || new Date().toISOString(),
+        likes: typeof row.likes === 'number' ? row.likes : 0
+    };
+}
+
+// Database In-Memory Fallback dengan cuplikan lagu 30 detik asli
 let menfessData = [
     {
         id: 1731309800001,
@@ -70,18 +105,53 @@ let menfessData = [
 ];
 
 // 1. GET: Mengambil semua data menfess
-app.get('/api/menfess', (req, res) => {
-    res.status(200).json(menfessData);
+app.get('/api/menfess', async (req, res) => {
+    try {
+        if (supabase) {
+            const { data, error } = await supabase
+                .from('menfess')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            if (!error && Array.isArray(data) && data.length > 0) {
+                return res.status(200).json(data.map(formatMenfessRow));
+            }
+            if (error) {
+                console.warn("Supabase query warning:", error.message);
+            }
+        }
+        res.status(200).json(menfessData);
+    } catch (err) {
+        console.error("Error saat GET /api/menfess:", err);
+        res.status(200).json(menfessData);
+    }
 });
 
 // 2. GET: Mengambil satu pesan spesifik berdasarkan ID
-app.get('/api/menfess/:id', (req, res) => {
-    const id = Number(req.params.id);
-    const item = menfessData.find(m => m.id === id);
-    if (!item) {
-        return res.status(404).json({ error: "Pesan menfess tidak ditemukan" });
+app.get('/api/menfess/:id', async (req, res) => {
+    try {
+        const id = Number(req.params.id);
+        if (supabase) {
+            const { data, error } = await supabase
+                .from('menfess')
+                .select('*')
+                .eq('id', id)
+                .maybeSingle();
+
+            if (!error && data) {
+                return res.status(200).json(formatMenfessRow(data));
+            }
+        }
+
+        const item = menfessData.find(m => m.id === id);
+        if (!item) {
+            return res.status(404).json({ error: "Pesan menfess tidak ditemukan" });
+        }
+        res.status(200).json(item);
+    } catch (err) {
+        console.error("Error saat GET /api/menfess/:id:", err);
+        res.status(500).json({ error: "Terjadi kesalahan pada server" });
     }
-    res.status(200).json(item);
 });
 
 // 3. GET: Proxy pencarian lagu iTunes (30-second audio preview)
@@ -104,45 +174,112 @@ app.get('/api/songs/search', async (req, res) => {
     }
 });
 
-// 4. POST: Menerima data menfess baru dari Frontend
-app.post('/api/menfess', (req, res) => {
+// 4. POST: Menerima data menfess baru dari Frontend & Simpan ke Supabase
+app.post('/api/menfess', async (req, res) => {
     try {
         const { to, from, song, previewUrl, artworkUrl, message } = req.body;
 
-        // Validasi: pastikan 'to' dan 'message' terisi dan bukan spasi kosong
         if (!to || !to.trim() || !message || !message.trim()) {
             return res.status(400).json({ error: "Kolom 'To' dan 'Message' wajib diisi!" });
         }
 
-        const newMenfess = {
-            id: Date.now(),
+        const newId = Date.now();
+        const nowIso = new Date().toISOString();
+
+        const itemFormatted = {
+            id: newId,
             to: to.trim().slice(0, 60),
             from: from && from.trim() !== "" ? from.trim().slice(0, 60) : 'Anonim',
             song: song && song.trim() !== "" ? song.trim().slice(0, 80) : '',
             previewUrl: previewUrl && typeof previewUrl === 'string' ? previewUrl.slice(0, 500) : '',
             artworkUrl: artworkUrl && typeof artworkUrl === 'string' ? artworkUrl.slice(0, 500) : '',
             message: message.trim().slice(0, 1000),
-            createdAt: new Date().toISOString(),
+            createdAt: nowIso,
             likes: 0
         };
 
-        // Masukkan ke array paling depan (unshift) supaya langsung jadi data terbaru
-        menfessData.unshift(newMenfess);
+        if (supabase) {
+            const insertPayload = {
+                id: itemFormatted.id,
+                to: itemFormatted.to,
+                from: itemFormatted.from,
+                song: itemFormatted.song,
+                preview_url: itemFormatted.previewUrl,
+                artwork_url: itemFormatted.artworkUrl,
+                message: itemFormatted.message,
+                likes: 0,
+                created_at: itemFormatted.createdAt
+            };
 
-        console.log("Berhasil menyimpan menfess baru:", newMenfess);
-        res.status(201).json(newMenfess);
+            const { data, error } = await supabase
+                .from('menfess')
+                .insert([insertPayload])
+                .select()
+                .maybeSingle();
+
+            if (!error && data) {
+                console.log("Berhasil menyimpan menfess baru ke Supabase:", data);
+                menfessData.unshift(formatMenfessRow(data));
+                return res.status(201).json(formatMenfessRow(data));
+            } else if (error) {
+                console.warn("Gagal simpan ke Supabase (skema default), mencoba format camelCase:", error.message);
+                const altPayload = {
+                    id: itemFormatted.id,
+                    to: itemFormatted.to,
+                    from: itemFormatted.from,
+                    song: itemFormatted.song,
+                    previewUrl: itemFormatted.previewUrl,
+                    artworkUrl: itemFormatted.artworkUrl,
+                    message: itemFormatted.message,
+                    likes: 0,
+                    createdAt: itemFormatted.createdAt
+                };
+                const retry = await supabase.from('menfess').insert([altPayload]).select().maybeSingle();
+                if (!retry.error && retry.data) {
+                    menfessData.unshift(formatMenfessRow(retry.data));
+                    return res.status(201).json(formatMenfessRow(retry.data));
+                }
+            }
+        }
+
+        // Fallback simpan ke memory
+        menfessData.unshift(itemFormatted);
+        console.log("Berhasil menyimpan menfess baru ke Memory:", itemFormatted);
+        res.status(201).json(itemFormatted);
     } catch (err) {
         console.error("Error saat POST menfess:", err);
         res.status(500).json({ error: "Terjadi kesalahan pada server" });
     }
 });
 
-// 5. POST: Memberikan Like / Reaksi pada menfess
-app.post('/api/menfess/:id/like', (req, res) => {
+// 5. POST: Memberikan Like / Reaksi pada menfess & Update di Supabase
+app.post('/api/menfess/:id/like', async (req, res) => {
     try {
         const id = Number(req.params.id);
-        const item = menfessData.find(m => m.id === id);
 
+        if (supabase) {
+            const { data: current, error: fetchErr } = await supabase
+                .from('menfess')
+                .select('likes')
+                .eq('id', id)
+                .maybeSingle();
+
+            if (!fetchErr && current) {
+                const newLikes = (current.likes || 0) + 1;
+                const { error: updateErr } = await supabase
+                    .from('menfess')
+                    .update({ likes: newLikes })
+                    .eq('id', id);
+
+                if (!updateErr) {
+                    const localItem = menfessData.find(m => m.id === id);
+                    if (localItem) localItem.likes = newLikes;
+                    return res.status(200).json({ success: true, id, likes: newLikes });
+                }
+            }
+        }
+
+        const item = menfessData.find(m => m.id === id);
         if (!item) {
             return res.status(404).json({ error: "Pesan menfess tidak ditemukan" });
         }
