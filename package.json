@@ -1,0 +1,16 @@
+{
+  "name": "maribermenfess",
+  "version": "1.0.0",
+  "description": "Website Menfess interaktif dengan cuplikan lagu 30 detik ala sendthesong.xyz",
+  "main": "API/index.js",
+  "scripts": {
+    "start": "node API/index.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^5.3.0"
+  },
+  "engines": {
+    "node": ">=18.x"
+  }
+}

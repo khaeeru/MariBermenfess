@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MariBermenfess — Send The Untold Words & Songs</title>
+    <!-- Font Playfair Display (Serif) & Inter (Sans-Serif) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;1,400;1,600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="Style.css">
+</head>
+<body>
+    <!-- ANIMASI SURAT TERBUKA SLOW-MO -->
+    <div id="loader">
+        <div class="envelope-wrapper">
+            <div class="envelope">
+                <div class="flap"></div>
+                <div class="letter">
+                    <i class="fa-solid fa-heart" style="color: #7b61ff; font-size: 24px; margin-top: 15px;"></i>
+                </div>
+            </div>
+        </div>
+        <p class="loader-text">Membuka pesan semesta...</p>
+    </div>
+
+    <!-- NAVBAR -->
+    <nav class="navbar">
+        <div class="nav-brand" onclick="switchTab('beranda')">MariBermenfess</div>
+        <div class="nav-links">
+            <button class="nav-btn active" data-tab="beranda" onclick="switchTab('beranda')">Beranda</button>
+            <button class="nav-btn" data-tab="submit" onclick="switchTab('submit')">Submit</button>
+            <button class="nav-btn" data-tab="browse" onclick="switchTab('browse')">Browse</button>
+            <button class="nav-btn" data-tab="history" onclick="switchTab('history')">History</button>
+            <button id="themeToggle" class="btn-theme" title="Ganti Tema" aria-label="Ganti Tema"><i class="fa-solid fa-heart"></i></button>
+        </div>
+    </nav>
+
+    <main>
+        <!-- ================= TAB 1: BERANDA ================= -->
+        <section id="beranda" class="tab-content active">
+            <!-- Hero Section -->
+            <div class="hero-section">
+                <div class="badge-top">RUANG KECIL UNTUK RASA YANG BESAR</div>
+                <h1 class="hero-title">
+                    Ada rasa yang belum<br>
+                    <span class="hero-italic">sempat jadi kata.</span>
+                </h1>
+                <p class="hero-subtitle">Untuk dia, untuk mereka, atau untuk dirimu sendiri.<br>Titipkan pesanmu di sini lengkap dengan cuplikan lagu pilihanmu. Biar rasa menemukan jalannya.</p>
+                <div class="hero-buttons">
+                    <button class="btn-primary" onclick="switchTab('submit')">Tulis menfess ↗</button>
+                    <button class="btn-secondary" onclick="switchTab('browse')">Jelajahi pesan ↗</button>
+                </div>
+            </div>
+
+            <!-- Marquee Section (Animasi Berjalan) -->
+            <div class="marquee-section">
+                <div class="marquee-header">
+                    <h2>Yang sedang dirasakan</h2>
+                    <p>Sepotong cerita & nada. Klik pesan untuk membuka dan mendengarkan lagunya.</p>
+                </div>
+                <div class="marquee-container">
+                    <div class="marquee-track" id="marqueeTrack">
+                        <!-- Data Box Warna-Warni Muncul Di Sini -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Features Section -->
+            <div class="features-section">
+                <div class="feature-item">
+                    <h2>Dari hati,<br>sampai di sini.</h2>
+                    <p>Tidak semua hal harus dipendam sendiri.</p>
+                </div>
+                <div class="feature-item">
+                    <div class="step-num">01</div>
+                    <h3>Pilih lagu & rasa</h3>
+                    <p>Pilih dari lagu populer yang tersedia atau cari lagu bebasmu dengan cuplikan 30 detik.</p>
+                </div>
+                <div class="feature-item">
+                    <div class="step-num">02</div>
+                    <h3>Titipkan pesanmu</h3>
+                    <p>Kirim secara anonim. Pesan yang berhasil dikirim akan langsung tersiar di beranda.</p>
+                </div>
+                <div class="feature-item">
+                    <div class="step-num">03</div>
+                    <h3>Putar & Temukan</h3>
+                    <p>Buka pesan di Browse atau History dan dengarkan cuplikan lagu yang dititipkan.</p>
+                </div>
+            </div>
+
+            <!-- Bottom CTA -->
+            <div class="cta-banner">
+                <div class="cta-content">
+                    <h2>Masih ada yang mengganjal?</h2>
+                    <p>Satu pesan kecil dan 30 detik alunan melodi bisa membuat hati sedikit lebih lega.</p>
+                </div>
+                <button class="btn-primary" onclick="switchTab('submit')">Tulis menfess ↗</button>
+            </div>
+            
+            <footer class="footer">
+                <div class="nav-brand" onclick="switchTab('beranda')" style="cursor: pointer;">MariBermenfess</div>
+                <p>© 2026 MariBermenfess. A bunch of untold words, sent through the songs.</p>
+            </footer>
+        </section>
+
+        <!-- ================= TAB 2: SUBMIT ================= -->
+        <section id="submit" class="tab-content" style="padding-top: 100px;">
+            <div class="hero-section" style="margin-bottom: 30px;">
+                <h1 class="hero-title">Tulis <span class="hero-italic">pesanmu.</span></h1>
+                <p class="hero-subtitle">Katakan apa yang tersimpan. Sertakan cuplikan lagu 30 detik yang mewakili hatimu.</p>
+            </div>
+            <div class="form-container">
+                <form id="formMenfess" class="form-card">
+                    <input type="text" id="to" placeholder="Untuk: (Nama penerima atau inisial)" maxlength="60" required>
+                    <input type="text" id="from" placeholder="Dari: (Boleh anonim atau nama samaran)" maxlength="60">
+                    
+                    <!-- Search & Selection Box Lagu Pilihan -->
+                    <div class="song-input-wrapper">
+                        <label class="form-field-label"><i class="fa-solid fa-music"></i> Lagu Pilihanmu (Bisa ketik atau klik pilihan di bawah):</label>
+                        <div class="input-icon-box">
+                            <i class="fa-solid fa-magnifying-glass input-icon"></i>
+                            <input type="text" id="song" placeholder="Ketik judul lagu / pilih rekomendasi di bawah..." autocomplete="off" maxlength="80">
+                            <button type="button" id="clearSongBtn" class="clear-song-btn" style="display:none;" onclick="clearSelectedSong()" title="Hapus lagu">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+                        </div>
+                        <input type="hidden" id="songPreviewUrl" value="">
+                        <input type="hidden" id="songArtworkUrl" value="">
+
+                        <!-- PILIHAN LAGU LANGSUNG TAMPIL DI BAWAH BOX -->
+                        <div class="quick-songs-bar" id="quickSongsBar">
+                            <span class="quick-songs-hint"><i class="fa-solid fa-fire"></i> Pilihan Cepat Populer:</span>
+                            <div class="quick-songs-list" id="quickSongsList">
+                                <!-- Chip lagu diisi otomatis oleh JS -->
+                            </div>
+                        </div>
+
+                        <!-- Dropdown Hasil Pencarian Lagu Real-Time -->
+                        <div id="songDropdown" class="song-dropdown">
+                            <div class="dropdown-header">
+                                <span id="dropdownHeaderTitle"><i class="fa-solid fa-music"></i> Hasil Pencarian Lagu</span>
+                                <span id="dropdownLoading" class="dropdown-loading" style="display: none;"><i class="fa-solid fa-circle-notch fa-spin"></i> Mencari...</span>
+                            </div>
+                            <div id="songDropdownList" class="dropdown-list">
+                                <!-- Hasil pencarian diisi via Scripts.js -->
+                            </div>
+                        </div>
+
+                        <!-- Kotak Lagu yang Telah Dipilih -->
+                        <div id="selectedSongBox" class="selected-song-box" style="display: none;">
+                            <img id="selectedSongImg" src="" alt="Album Art" class="selected-song-art">
+                            <div class="selected-song-info">
+                                <div id="selectedSongTitle" class="selected-song-title">Judul Lagu</div>
+                                <div class="selected-song-audio-bar">
+                                    <button type="button" id="formAudioPlayBtn" class="snippet-play-btn" onclick="toggleFormAudioPreview()">
+                                        <i class="fa-solid fa-play"></i> <span>Dengar Cuplikan (30s)</span>
+                                    </button>
+                                    <span id="formAudioTime" class="snippet-time">0:00 / 0:30</span>
+                                </div>
+                            </div>
+                            <button type="button" class="remove-song-btn" onclick="clearSelectedSong()" title="Ganti lagu">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <textarea id="message" rows="5" placeholder="Tuliskan rasamu di sini..." maxlength="500" required></textarea>
+                    <div class="form-helper">
+                        <span id="charCount">0</span>/500 karakter
+                    </div>
+                    <button type="submit" class="btn-primary" style="width: 100%;">Kirim Pesan ↗</button>
+                </form>
+            </div>
+        </section>
+
+        <!-- ================= TAB 3: BROWSE ================= -->
+        <section id="browse" class="tab-content" style="padding-top: 100px;">
+            <div class="hero-section" style="margin-bottom: 30px;">
+                <h1 class="hero-title">Jelajahi <span class="hero-italic">rasa.</span></h1>
+                <p class="hero-subtitle">Membaca ribuan cerita & alunan nada. Klik kartu untuk membuka dan memutar cuplikan lagunya.</p>
+            </div>
+            <div class="form-container">
+                <input type="text" id="searchInput" class="search-input" placeholder="Cari penerima, pengirim, judul lagu, atau isi pesan..." oninput="searchMenfess()">
+                <div class="browse-toolbar">
+                    <span id="browseCount" class="browse-count">Memuat pesan...</span>
+                    <div class="browse-filters">
+                        <button class="sort-btn active" id="sortNewest" onclick="setSortMode('newest')">Terbaru</button>
+                        <button class="sort-btn" id="sortPopular" onclick="setSortMode('popular')">Terpopuler ❤️</button>
+                    </div>
+                </div>
+            </div>
+            <div id="browseFeed" class="feed-grid"></div>
+        </section>
+
+        <!-- ================= TAB 4: HISTORY ================= -->
+        <section id="history" class="tab-content" style="padding-top: 100px;">
+            <div class="hero-section" style="margin-bottom: 30px;">
+                <h1 class="hero-title">Riwayat <span class="hero-italic">pesanmu.</span></h1>
+                <p class="hero-subtitle">Pesan-pesan menfess yang pernah kamu titipkan dari browser ini.</p>
+            </div>
+            <div id="historyFeed" class="feed-grid"></div>
+        </section>
+    </main>
+
+    <!-- ================= MODAL DETAIL PESAN DENGAN PEMUTAR CUPLIKAN 30 DETIK ================= -->
+    <div id="messageModal" class="modal-backdrop" onclick="closeMessageModalOnBackdrop(event)">
+        <div class="modal-card">
+            <button class="modal-close-btn" onclick="closeMessageModal()" aria-label="Tutup popup" title="Tutup">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            
+            <div class="modal-header">
+                <span class="modal-badge"><i class="fa-solid fa-envelope-open-text"></i> THE UNTOLD WORDS</span>
+                <h2 id="modalTo" class="modal-title">Dear Seseorang</h2>
+                <div id="modalDate" class="modal-date">Dikirim pada 11 Nov 2026</div>
+            </div>
+
+            <!-- Music Player Box dengan Audio Cuplikan 30 Detik Real -->
+            <div id="modalSongWidget" class="modal-song-widget">
+                <!-- Piringan Hitam yang berputar saat audio diputar -->
+                <div class="vinyl-disc-wrapper" onclick="toggleModalAudioPlayback()" title="Klik untuk putar / jeda">
+                    <div id="modalVinylDisc" class="vinyl-disc">
+                        <div class="vinyl-groove"></div>
+                        <div class="vinyl-center">
+                            <i id="modalVinylIcon" class="fa-solid fa-play"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="song-info">
+                    <div class="song-header-row">
+                        <div class="song-tag"><i class="fa-solid fa-headphones"></i> CUPLIKAN 30 DETIK</div>
+                        <div id="modalAudioWave" class="audio-wave">
+                            <span class="bar"></span>
+                            <span class="bar"></span>
+                            <span class="bar"></span>
+                            <span class="bar"></span>
+                        </div>
+                    </div>
+                    <div id="modalSongTitle" class="song-title">Sal Priadi - Gala Bunga Matahari</div>
+                    
+                    <!-- Tombol Putar Cuplikan Besar & Jelas -->
+                    <div class="audio-main-play-bar">
+                        <button type="button" id="modalPlayBtn" class="big-play-btn" onclick="toggleModalAudioPlayback()">
+                            <i id="modalPlayIcon" class="fa-solid fa-play"></i>
+                            <span id="modalPlayText">Putar Cuplikan (30s)</span>
+                        </button>
+                        <span id="modalAudioTime" class="audio-time-label">0:00 / 0:30</span>
+                    </div>
+
+                    <!-- Progress Bar Interaktif -->
+                    <div class="audio-progress-bar-wrapper" onclick="seekModalAudio(event)">
+                        <div id="modalAudioProgressBar" class="audio-progress-bar"></div>
+                    </div>
+
+                    <a id="modalSpotifyBtn" href="#" target="_blank" rel="noopener noreferrer" class="spotify-btn">
+                        <i class="fa-brands fa-spotify"></i> Dengarkan Penuh di Spotify ↗
+                    </a>
+                </div>
+            </div>
+
+            <!-- Message Body -->
+            <div class="modal-body">
+                <div class="quote-mark left">“</div>
+                <p id="modalMessage" class="modal-message">Pesan akan ditampilkan di sini...</p>
+                <div class="quote-mark right">”</div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="modal-footer">
+                <div id="modalFrom" class="modal-from">Dari: Anonim</div>
+                <div class="modal-actions">
+                    <button id="modalLikeBtn" class="modal-action-btn like-btn" onclick="handleModalLike()">
+                        <i class="fa-regular fa-heart"></i>
+                        <span id="modalLikeCount">0</span>
+                    </button>
+                    <button class="modal-action-btn" onclick="handleModalCopy()" title="Salin Isi Pesan">
+                        <i class="fa-regular fa-copy"></i>
+                        <span>Salin</span>
+                    </button>
+                    <button class="modal-action-btn" onclick="handleModalShare()" title="Bagikan Tautan Pesan">
+                        <i class="fa-solid fa-share-nodes"></i>
+                        <span>Bagikan</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- HTML5 Audio Elements untuk Pemutaran 30 Detik -->
+    <audio id="modalAudioPlayer" preload="auto"></audio>
+    <audio id="formAudioPlayer" preload="auto"></audio>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">
+        <i class="fa-solid fa-heart" id="toastIcon"></i>
+        <span id="toastMessage">Pesan berhasil dikirim!</span>
+    </div>
+
+    <script src="Scripts.js"></script>
+</body>
+</html>
